@@ -15,8 +15,16 @@
             <property name="hibernate.show_sql" value="true"/> <!-- /* 쿼리 나가는 거 보기 */-->
             <property name="hibernate.format_sql" value="true"/> <!-- /* 콘솔창 쿼리문이 이쁘게 나감 */-->
             <property name="hibernate.use_sql_comments"  value="true"/> <!-- /* 콘솔창에 이 쿼리문이 왜 나갔는 지 알려줌 */-->
-<!--            <property name="hibername.jdbc.batch_size" value="10"/> &lt;!&ndash; /* 쿼리문 10개 쌓은 후 날리기 */&ndash;&gt;-->
-<!--            <property name="hibernate.hbm2ddl.auto" value="create" />-->
+<!--            <property name="hibername.jdbc.batch_size" value="10"/> /* 쿼리문 10개 쌓은 후 날리기 */-->
+            <!--    create(기존 테이블 삭제 후 다시 생성, DROP + CREATE, 운영 사용 x)
+                    create-drop(create와 같으나 종료 시점에 drop, 운영 사용 x)
+                    update(변경부분만 반영(운영 DB에 사용하면 안됨)
+                    validate(엔티티와 테이블이 정상 매핑되었는지만 확인)
+                    none(사용하지 않음)
+                    *개발 초기에는 create or update
+                    *테스트 서버는 update or validate -> 근데 가급적이면 사용 ㄴ(alter가 여러 개 나가면 잠시 서버가 중단되니)
+                    *스테이징과 운영 서버는 validate or none -->
+            <property name="hibernate.hbm2ddl.auto" value="create" />
         </properties>
     </persistence-unit>
 
