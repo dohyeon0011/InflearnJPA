@@ -27,6 +27,10 @@ public class JpaMain {
          * 4. 변경 감지
          * 5. 지원 로딩(*중요, 쿼리를 미뤘다 나중에 날리는)
          */
+        /**
+         * IDENTITY는 영속성 컨텍스트에 저장하는 순간 insert 쿼리가 날라감(insert를 날려야 기본 키 값을 알 수 있어서)
+         * 시퀀스 전략은 시퀀스에서 다음 값을 얻어올 수 있어서, 영속성 컨텍스트에 쌓아 뒀다가 커밋 시점에 날림.
+         */
         try {
             // 객체를 생성한 상태(비영속)
             // 영속(영속성 컨텍스트에 관리되는 상태)
@@ -58,9 +62,9 @@ public class JpaMain {
 //            findMember.setName("ZZZZZ");
 
             // em.setFlushMode(FlushModeType.COMMIT) or .AUTO => default가 AUTO
-            Member member = new Member(200L, "member200");
-            em.persist(member); // 영속성 컨텍스트에 저장
-            em.flush(); // flush()를 날리면 DB에 쿼리가 즉시 나감(트랜잭션 커밋, JPQL은 자동으로 flush 자동 호출)
+//            Member member = new Member(200L, "member200", 25);
+//            em.persist(member); // 영속성 컨텍스트에 저장
+//            em.flush(); // flush()를 날리면 DB에 쿼리가 즉시 나감(트랜잭션 커밋, JPQL은 자동으로 flush 자동 호출)
 
             // 준영속(영속 -> 준영속, 영속 상태의 엔티티가 영속성 컨텍스트에서 분리)
 //            em.detach(member); 분리하면 이제 커밋해도 변경 사항에 적용되지 않음.
