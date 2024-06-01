@@ -1,5 +1,6 @@
 package hellojpa;
 
+import hellojpa.extend.Movie;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -83,6 +84,20 @@ public class JpaMain {
 
             // 엔티티를 영속(1차 캐쉬에 저장)
 //            em.persist(member1);
+
+            Movie movie = new Movie();
+            movie.setDirector("aaaa");
+            movie.setActor("bbbb");
+            movie.setName("바람과 함께 사라지다");
+            movie.setPrice(10000);
+
+            em.persist(movie);
+            em.flush();
+            em.clear();
+
+            Movie findMovie = em.find(Movie.class, movie.getId()); // inner join으로 쿼리 날려서 select함.
+            System.out.println("findMovie = " + findMovie);
+
             tx.commit(); // 트랜잭션 커밋하는 순간에 DB에 쿼리를 날림(쓰기 지연)
         } catch (Exception e) {
             tx.rollback();
