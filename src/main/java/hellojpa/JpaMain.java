@@ -1,7 +1,10 @@
 package hellojpa;
 
+import hellojpa.cascade.Child;
+import hellojpa.cascade.Parent;
 import hellojpa.extend.Movie;
 import jakarta.persistence.*;
+import org.hibernate.Hibernate;
 
 import java.util.List;
 
@@ -85,7 +88,7 @@ public class JpaMain {
             // 엔티티를 영속(1차 캐쉬에 저장)
 //            em.persist(member1);
 
-            Movie movie = new Movie();
+            /*Movie movie = new Movie();
             movie.setDirector("aaaa");
             movie.setActor("bbbb");
             movie.setName("바람과 함께 사라지다");
@@ -96,11 +99,73 @@ public class JpaMain {
             em.clear();
 
             Movie findMovie = em.find(Movie.class, movie.getId()); // inner join으로 쿼리 날려서 select함.
-            System.out.println("findMovie = " + findMovie);
+            System.out.println("findMovie = " + findMovie);*/
+
+//            em.find() : 데이터베이스를 통해서 실제 엔티티 객체 조회
+//            em.getReference() : 데이터베이스 조회를 미루는 가짜(프록시) 엔티티 객체 조회(DB의 쿼리가 안 나갔는데 객체가 조회가 됨)
+
+            /*Member member = new Member();
+            member.setUsername("hello");
+
+            em.persist(member);
+
+            em.flush();
+            em.clear();*/
+
+//            Member findMember = em.find(Member.class, member.getId());
+//            System.out.println("findMember.getId() = " + findMember.getId());
+//            System.out.println("findMember.getUsername = " + findMember.getUsername());
+
+            /**
+             * 프록시 객체는 처음 사용할 때 한 번만 초기화
+             * 원본 엔티티를 상속받아 타입 체크시 == 비교 실패, instanceof 를 사용해야 함.
+             * em.getReference()를 하는 시점에는 쿼리가 안 나가고, 값을 실제 사용할 때 쿼리가 나감.
+             * em.getReference()는 실제 객체가 아닌 가짜 프록시 객체를 전달해줌.
+             * 프록시 객체에 Entity target(진짜 레퍼런스를 가리킴)이 처음엔 null을 갖고 있다가 껍데기에 이 ID값만 딱 들고 있는 가짜 객체가 반환.
+             * 프록시 객체를 호출하면 프록시 객체는 실제 객체의 메서드를 호출함. (값 요청 시점에 영속성 컨텍스트를 통해서 초기화(값을 달라)를 요청하면 영속성 컨텍스트가 DB에서 객체 만들어 가져와서 target에 진짜 객체를 연결해줌)
+             * 프록시 특징 : 실제 클래스를 상속 받아 만들어져 겉 모양이 같다, 사용하는 입장에서는 진짜 객체인지 프록시 객체인지 구분하지 않고 사용하면 됨(이론상)
+             * 영속성 컨텍스트에 올라가 있는 상태에서 em.getReference()로 조회하면 진짜 객체를 반환해줌.
+             * em.getReference() 먼저하고 em.find() 하면 em.find() 에서도 프록시 객체가 반환됨. (JPA에서는 ==(타입) 을 무조건 맞추게 보장해주기 때문)
+             */
+            /*Member findMember = em.getReference(Member.class, member.getId());
+            System.out.println("findMember = " + findMember);
+            System.out.println("findMember.getId = " + findMember.getId());
+            System.out.println("findMember.getUsername = " + findMember.getUsername());
+
+            System.out.println("findMember.getClass = " + findMember.getClass()); // proxy class 확인
+//            findMember.getUsername(); // 프록시 강제 초기화(JPA 표준은 강제 초기화가 없어서 이렇게 강제 호출해줘야 함)
+            Hibernate.initialize(findMember); // 프록시 강제 초기화
+
+            // 프록시 인스턴스의 초기화 여부 확인
+            em.detach(findMember);
+            System.out.println("isLoaded = " + emf.getPersistenceUnitUtil().isLoaded(findMember));*/
+
+            Child child1 = new Child();
+            Child child2 = new Child();
+
+            Parent parent = new Parent();
+            parent.addChile(child1);
+            parent.addChile(child2);
+
+            em.persist(parent);
+//            em.persist(child1);
+//            em.persist(child2);
+
+            em.flush();
+            em.clear();
+
+            Parent findParent = em.find(Parent.class, parent.getId()); // orphanRemoval = true 이면 List 컬렉션에서 빠진 것이 삭제가 됨.
+//            findParent.getChildList().remove(0);
+
+//            em.remove(findParent); // orphanRemoval = true 이면 List<Child> 자식들까지 다 날라감
+
+//            em.persist(child1);
+//            em.persist(child2);
 
             tx.commit(); // 트랜잭션 커밋하는 순간에 DB에 쿼리를 날림(쓰기 지연)
         } catch (Exception e) {
             tx.rollback();
+            e.printStackTrace();
         } finally {
             em.close();
         }
