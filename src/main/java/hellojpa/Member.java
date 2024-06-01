@@ -82,6 +82,23 @@ public class Member {
     // 다대다를 일대다로 다대다로 풀기
     @OneToMany(mappedBy = "member")
     private List<MemberProduct> memberProducts = new ArrayList<>();
+    /**
+     * @ManyToOne(fetch = FetchType.LAZY), 지연로딩
+     * Member는 실제 객체로 조회하고, 매핑한 객체는 프록시 객체로 가져옴
+     * 필요할 때만 조회하기 위해서(실제 사용하는 시점에 초기화해서 쿼리문 날리기 위해서(프록시 객체의 메서드를 호출할 때 초기화됨))
+     *
+     * @ManyToOne(fetch = FetchType.EAGER), 즉시로딩
+     * 두 객체를 거의 다 사용하는 상황일 때
+     * em.find()로 가져올 때 부터 바로 두 객체 다 가져옴.(프록시를 쓰지 않고 실제 객체들을 가져옴)
+     * 모든 연관관계에 지연 로딩 사용하기(실무에서 즉시 로딩 사용 X)
+     * 즉시 로딩을 적용하면 예상치 못한 SQL이 발생
+     * 즉시 로딩은 JPQL에서 N+1 문제를 일으킴 (JPQL로 select을 쳤는데 즉시로딩이 걸려 있으면 또 연관관계 걸려있는 객체까지 쿼리가 나감)
+     * @ManyToOne, @OneToOne은  기본이 즉시 로딩 -> LAZY로 설정
+     * @OneToMany, @ManyToMany는 기본이 지연 로딩
+     *  N+1 해결 방법 : 모든 연관관계를 LAZY로 지연 로딩으로 깔고,
+     *  1. JQPL fetch join (보통 이 방법으로 해결) -> LAZY로 했지만 실행하는 쿼리에 따라서 연관관계 객체를 싹 다 조회해서 데이터가 이미 채워져서 나옴.
+     *  2. 엔티티 그래프 기능 사용
+     */
 
     // varchar를 넘어선 더 큰 자료형
     @Lob
@@ -93,4 +110,91 @@ public class Member {
     public Member() {
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public RoleType getRoleType() {
+        return roleType;
+    }
+
+    public void setRoleType(RoleType roleType) {
+        this.roleType = roleType;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Date getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(Date lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
+    }
+
+    public LocalDate getTest1() {
+        return test1;
+    }
+
+    public void setTest1(LocalDate test1) {
+        this.test1 = test1;
+    }
+
+    public LocalDateTime getTest2() {
+        return test2;
+    }
+
+    public void setTest2(LocalDateTime test2) {
+        this.test2 = test2;
+    }
+
+    public List<MemberProduct> getMemberProducts() {
+        return memberProducts;
+    }
+
+    public void setMemberProducts(List<MemberProduct> memberProducts) {
+        this.memberProducts = memberProducts;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getTemp() {
+        return temp;
+    }
+
+    public void setTemp(int temp) {
+        this.temp = temp;
+    }
 }
