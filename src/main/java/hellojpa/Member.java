@@ -104,7 +104,7 @@ public class Member {
     @Lob
     private String description;
 
-    @Transient // DB와 별개롤 메모리에만 쓰려고 할 때
+    @Transient // DB와 별개로 메모리에만 쓰려고 할 때
     private int temp;
 
     public Member() {
