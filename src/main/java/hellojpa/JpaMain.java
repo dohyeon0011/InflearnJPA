@@ -3,10 +3,14 @@ package hellojpa;
 import hellojpa.cascade.Child;
 import hellojpa.cascade.Parent;
 import hellojpa.extend.Movie;
+import hellojpa.valuetype.Address;
+import hellojpa.valuetype.AddressEntity;
+import hellojpa.valuetype.User;
 import jakarta.persistence.*;
 import org.hibernate.Hibernate;
 
 import java.util.List;
+import java.util.Set;
 
 public class JpaMain {
 
@@ -140,27 +144,78 @@ public class JpaMain {
             em.detach(findMember);
             System.out.println("isLoaded = " + emf.getPersistenceUnitUtil().isLoaded(findMember));*/
 
-            Child child1 = new Child();
+/*            Child child1 = new Child();
             Child child2 = new Child();
 
             Parent parent = new Parent();
             parent.addChile(child1);
             parent.addChile(child2);
 
-            em.persist(parent);
+            em.persist(parent);*/
 //            em.persist(child1);
 //            em.persist(child2);
 
-            em.flush();
-            em.clear();
+            /*em.flush();
+            em.clear();*/
 
-            Parent findParent = em.find(Parent.class, parent.getId()); // orphanRemoval = true 이면 List 컬렉션에서 빠진 것이 삭제가 됨.
+//            Parent findParent = em.find(Parent.class, parent.getId()); // orphanRemoval = true 이면 List 컬렉션에서 빠진 것이 삭제가 됨.
 //            findParent.getChildList().remove(0);
 
 //            em.remove(findParent); // orphanRemoval = true 이면 List<Child> 자식들까지 다 날라감
 
 //            em.persist(child1);
 //            em.persist(child2);
+
+            // user 테이블에 직접 주소 넣기
+            User user = new User();
+            user.setUsername("member1");
+            user.setHomeAddress(new Address("homeCity", "street", "1000"));
+
+            // FAVORITE_FOOD 컬렉션 테이블에 넣기
+            user.getFavoriteFoods().add("치킨");
+            user.getFavoriteFoods().add("족발");
+            user.getFavoriteFoods().add("피자");
+
+            // Address 컬렉션 테이블에 넣기
+            /*user.getAddressHistory().add(new Address("old1", "street", "1000"));
+            user.getAddressHistory().add(new Address("old2", "street", "1000"));
+            user.getAddressHistory().add(new Address("old3", "hood", "2000"));*/
+
+            em.persist(user); // 임베디드 타입은 값 타입이라 그냥 같이 영속성 컨텍스트에 들어감.(값 타입 컬렉션도 user 생명주기에 포함돼서 같이 들어감)
+            em.flush();
+            em.clear();
+
+            System.out.println("============ STRAT ==============");
+            User findUser = em.find(User.class, user.getId()); // 값 타입 컬렉션도 지연 로딩임
+            /*List<Address> addressHistory = findUser.getAddressHistory();
+            for (Address address : addressHistory) {
+                System.out.println("address = " + address.getCity());
+            }*/
+
+            Set<String> favoriteFoods = findUser.getFavoriteFoods();
+            for (String favoriteFood : favoriteFoods) {
+                System.out.println("favoriteFood = " + favoriteFood);
+            }
+
+            // homeCity -> newCity
+//            findUser.getHomeAddress().setCity("newCity"); // 이런식으로 변경하면 사이드 이펙트가 나감.(다른 엔티티와 공유해서 쓸 때, setter 로 변경하면 같이 다 바뀜)
+            Address a = findUser.getHomeAddress();
+            findUser.setHomeAddress(new Address("newCity", a.getStreet(), a.getZipcode())); // 이렇게 새로운 인스턴스로 갈아 끼워야 함.
+
+            // 치킨 -> 한식
+            findUser.getFavoriteFoods().remove("치킨");
+            findUser.getFavoriteFoods().add("한식");
+
+            // 주소 변경
+            // Address의 equals()와 hashCode()로 remove
+//            findUser.getAddressHistory().remove(new Address("old1", "street", "1000")); // memberId로 찾은 address 테이블의 값을 다 지우고(1:N 단방향이라, 자식은 부모 누구를 참조하는 지 모르지만, pk만 알고 있어서 pk로 다 지우고 insert)
+//            findUser.getAddressHistory().add(new Address("newCity1", "street", "10000")); // 남은 값을 다시 추가
+
+            // @OneToMany는 어쩔 수 없이 update 쿼리도 나감(외래키가 상대에 있어서)
+            System.out.println("============ STRAT ==============");
+            findUser.getAddressHistory().add(new AddressEntity("old1", "street", "1000"));
+            findUser.getAddressHistory().add(new AddressEntity("old2", "street", "10000"));
+            System.out.println("============ END ==============");
 
             tx.commit(); // 트랜잭션 커밋하는 순간에 DB에 쿼리를 날림(쓰기 지연)
         } catch (Exception e) {
