@@ -7,6 +7,9 @@ import hellojpa.valuetype.Address;
 import hellojpa.valuetype.AddressEntity;
 import hellojpa.valuetype.User;
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.Hibernate;
 
 import java.util.List;
@@ -167,44 +170,44 @@ public class JpaMain {
 //            em.persist(child2);
 
             // user 테이블에 직접 주소 넣기
-            User user = new User();
+           /* User user = new User();
             user.setUsername("member1");
             user.setHomeAddress(new Address("homeCity", "street", "1000"));
 
             // FAVORITE_FOOD 컬렉션 테이블에 넣기
             user.getFavoriteFoods().add("치킨");
             user.getFavoriteFoods().add("족발");
-            user.getFavoriteFoods().add("피자");
+            user.getFavoriteFoods().add("피자");*/
 
             // Address 컬렉션 테이블에 넣기
             /*user.getAddressHistory().add(new Address("old1", "street", "1000"));
             user.getAddressHistory().add(new Address("old2", "street", "1000"));
             user.getAddressHistory().add(new Address("old3", "hood", "2000"));*/
 
-            em.persist(user); // 임베디드 타입은 값 타입이라 그냥 같이 영속성 컨텍스트에 들어감.(값 타입 컬렉션도 user 생명주기에 포함돼서 같이 들어감)
+            /*em.persist(user); // 임베디드 타입은 값 타입이라 그냥 같이 영속성 컨텍스트에 들어감.(값 타입 컬렉션도 user 생명주기에 포함돼서 같이 들어감)
             em.flush();
-            em.clear();
+            em.clear();*/
 
-            System.out.println("============ STRAT ==============");
-            User findUser = em.find(User.class, user.getId()); // 값 타입 컬렉션도 지연 로딩임
+//            System.out.println("============ STRAT ==============");
+//            User findUser = em.find(User.class, user.getId()); // 값 타입 컬렉션도 지연 로딩임
             /*List<Address> addressHistory = findUser.getAddressHistory();
             for (Address address : addressHistory) {
                 System.out.println("address = " + address.getCity());
             }*/
 
-            Set<String> favoriteFoods = findUser.getFavoriteFoods();
+            /*Set<String> favoriteFoods = findUser.getFavoriteFoods();
             for (String favoriteFood : favoriteFoods) {
                 System.out.println("favoriteFood = " + favoriteFood);
-            }
+            }*/
 
             // homeCity -> newCity
 //            findUser.getHomeAddress().setCity("newCity"); // 이런식으로 변경하면 사이드 이펙트가 나감.(다른 엔티티와 공유해서 쓸 때, setter 로 변경하면 같이 다 바뀜)
-            Address a = findUser.getHomeAddress();
+            /*Address a = findUser.getHomeAddress();
             findUser.setHomeAddress(new Address("newCity", a.getStreet(), a.getZipcode())); // 이렇게 새로운 인스턴스로 갈아 끼워야 함.
 
             // 치킨 -> 한식
             findUser.getFavoriteFoods().remove("치킨");
-            findUser.getFavoriteFoods().add("한식");
+            findUser.getFavoriteFoods().add("한식");*/
 
             // 주소 변경
             // Address의 equals()와 hashCode()로 remove
@@ -212,10 +215,10 @@ public class JpaMain {
 //            findUser.getAddressHistory().add(new Address("newCity1", "street", "10000")); // 남은 값을 다시 추가
 
             // @OneToMany는 어쩔 수 없이 update 쿼리도 나감(외래키가 상대에 있어서)
-            System.out.println("============ STRAT ==============");
+            /*System.out.println("============ STRAT ==============");
             findUser.getAddressHistory().add(new AddressEntity("old1", "street", "1000"));
             findUser.getAddressHistory().add(new AddressEntity("old2", "street", "10000"));
-            System.out.println("============ END ==============");
+            System.out.println("============ END ==============");*/
 
             tx.commit(); // 트랜잭션 커밋하는 순간에 DB에 쿼리를 날림(쓰기 지연)
         } catch (Exception e) {
