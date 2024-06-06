@@ -10,6 +10,7 @@
             <property name="jakarta.persistence.jdbc.password" value=""/>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/test"/>
             <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+<!--            <property name="hibernate.dialect" value="hellojpa.jpql.dialect.MyH2Dialect"/> &lt;!&ndash; /* DB 커스텀 함수 */ &ndash;&gt;-->
 
             <!-- 옵션 -->
             <property name="hibernate.show_sql" value="true"/> <!-- /* 쿼리 나가는 거 보기 */-->
