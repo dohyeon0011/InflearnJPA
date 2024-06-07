@@ -54,6 +54,8 @@ public class JpqlMain  {
                 cq = cq.where(cb.equal(u.get("username"), findUserName));
             }*/
 
+            //            System.out.println("================================================================");
+
             Team teamA = new Team();
             teamA.setName("TEAM_A");
             em.persist(teamA);
@@ -88,6 +90,8 @@ public class JpqlMain  {
             em.persist(member1);
             em.persist(member2);
             em.persist(member3);
+
+//            System.out.println("================================================================");
 
             /**
              * TypeQuery : 반환 타입이 명확할 때
@@ -141,6 +145,8 @@ public class JpqlMain  {
             System.out.println("memberDTO.getUsername() = " + memberDTO.getUsername());
             System.out.println("memberDTO.getAge() = " + memberDTO.getAge());
 
+//            System.out.println("================================================================");
+
             /**
              * 페이징 API (JPA는 페이징을 두 API로 추상화)
              * setFirstResult(int startPosition) : 조회 시작 위치 (0부터 시작)
@@ -163,6 +169,8 @@ public class JpqlMain  {
                 System.out.println("member1 = " + member1);
             }*/
 
+            //            System.out.println("================================================================");
+
 //            String query = "select m from JpqlMember m join m.team t";
 //            String query = "select m from JpqlMember m left join m.team t"; // m이나 m.team 둘 중 하나가 값 없어도 값 나옴
 //            String query = "select m from JpqlMember m, Team t where m.username = t.name"; // 세타 조인(막 조인)
@@ -177,6 +185,8 @@ public class JpqlMain  {
                     .getResultList();*/
 
 //            em.createQuery("select i from Item i where type(i) = Book", Item.class) 상속 관계에서 Item의 DTYPE이 Book인 것만 select
+
+            //            System.out.println("================================================================");
 
             // 기본 CASE
             /*String query =
@@ -203,10 +213,14 @@ public class JpqlMain  {
                 System.out.println("s = " + s);
             }*/
 
+            //            System.out.println("================================================================");
+
 //            String query = "select concat('a', 'b') from JpqlMember m"; // 'a' || 'b'도 가능
 //            String query = "select substring(m.username, 3, 1) from JpqlMember m"; // 인덱스가 1부터 시작이고, 3부터 ~ 1개 뽑음
 //            String query = "select locate('de', 'abcdefg') from JpqlMember m";
 //            String query = "select size(t.members) from Team t";
+
+            //            System.out.println("================================================================");
 
             // 사용자 정의 함수 사용(username이 한줄로 나옴)
 //            String query = "select function('group_concat', m.username) from JpqlMember m";
@@ -215,6 +229,8 @@ public class JpqlMain  {
             for (String s : list) {
                 System.out.println("s = " + s);
             }*/
+
+            //            System.out.println("================================================================");
 
             /**
              * 경로 표현식
@@ -238,6 +254,8 @@ public class JpqlMain  {
             Integer singleResult = em.createQuery(query, Integer.class).getSingleResult();
             System.out.println("singleResult = " + singleResult);*/
 
+            //            System.out.println("================================================================");
+
             /**
              * 페치 조인(fetch join)
              * SQL 조인 종류X
@@ -245,6 +263,10 @@ public class JpqlMain  {
              * 연관된 엔티티나 컬렉션을 SQL 한 번에 함께 조회하는 기능(즉시 로딩)
              * join fetch 명령어 사용
              * [LEFT | INNER] JOIN FETCH 조인경로
+             * 단점 : 1. 페치 조인 대상에 별칭을 줄 수 없다.
+             *       2. 둘 이상의 컬렉션은 페치 조인 할 수 없다.
+             *       3. 컬렉션을 페치 조인하면 페이징 API(setFirstResult, setMaxResults)를 사용할 수 없다. (일대다에서 컬렉션 페치 조인 시 문제가 생겨서 그런거고, 다대일은 가능)
+             *       일대일, 다대일 같은 단일 값 연관 필드들은 페치 조인해도 페이징 가능, 하이버네이트는 경고 로그를 남기고 메모리에서 페이징(매우 위험)
              */
             // 회원을 조회하면서 연관된 팀도 함께 조회(SQL 한 번에)
             // 지연 로딩을 걸어도 fetch가 먼저 먹어서 프록시 안 가져오고 진짜 객체 값들 가져옴
@@ -257,18 +279,86 @@ public class JpqlMain  {
                 System.out.println("member = " + member.getUsername() + ", " + member.getTeam().getName());
             }*/
 
-            // 원래 컬렉션 페치 조인은 데이터가 뻥튀기 되는데 하이버네이트6부터 DISTINCT가 자동으로 추가해서 중복 제거함.(영속성 컨텍스트에서 같은 식별자를 가진 엔티티를 제거함)
+            // 원래 컬렉션 페치 조인은 데이터가 뻥튀기 되는데 하이버네이트6부터 DISTINCT가 자동으로 추가해서 중복 제거함.(영속성 컨텍스트에서 같은 식별자를 가진 엔티티를 제거함) (일대다)
             // TEAM_A에 회원 1,2 를 갖고 있는데 DB에서는 JOIN TABLE에 1(id), 팀A / 1(id), 1(team_id), 회원1 and 2, 1, 회원1 이렇게 두 개를 갖고 있어서
-            String query = "select t from Team t join fetch t.members"; // 컬렉션 페치 조인(일대다 관계)
-            List<Team> list = em.createQuery(query, Team.class).getResultList();
+//            String query = "select t from Team t join fetch t.members"; // 컬렉션 페치 조인(일대다 관계)
+//            String query = "select t from Team t"; // 여기서 team 전체 조회 한번 하고
+//            List<Team> list = em.createQuery(query, Team.class).getResultList();
+            /*List<Team> list = em.createQuery(query, Team.class)
+                    .setFirstResult(0)
+                    .setMaxResults(2)
+                    .getResultList();
 
-            for (Team team : list) {
+            System.out.println("list.size = " + list.size());*/
+
+            /*for (Team team : list) { // LAZY 설정이라서 여기서 꺼낼 때 마다 N+1로 쿼리문이 또 나감
                 System.out.println("team = " + team.getName() + " | members = " + team.getMembers().size());
 
                 for (JpqlMember member : team.getMembers()) {
                     System.out.println("-> member = " + member);
                 }
-            }
+            }*/
+
+            //            System.out.println("================================================================");
+
+            /**
+             * 엔티티 직접 사용 - 기본 키 값
+             * JPQL에 엔티티를 직접 사용하면 SQL에서 해당 엔티티의 기본 키 값을 사용
+             * ex) 1. select count(m.id) from Member m // 엔티티의 아이디를 사용
+             *     2. select count(m) from Member m // 엔티티를 직접 사용
+             *     => 두 JPQL 다 다음과 같은 SQL 실행 -> select count(m.id) as cnt from Member m;
+             *
+             * 엔티티를 파라미터로 전달해도 똑같이 됨.
+             * ex) 1. select m from Member m where m = :member 를 setParameter(파라미터)로 넘겨도 똑같이 됨
+             */
+            // 외래키 값 사용
+//            String query = "select m from JpqlMember m where m = :member"; // 엔티티를 직접 파라미터에 넣어도 where 절에서 m.id를 비교
+            /*JpqlMember member = em.createQuery(query, JpqlMember.class)
+                    .setParameter("member", member1)
+                    .getSingleResult();
+
+                System.out.println("member = " + member);*/
+
+            /*String query = "select m from JpqlMember m where m.team = :team"; // m.team.id 로도 가능(SQL에서는 이렇게 나가서)
+            JpqlMember member = em.createQuery(query, JpqlMember.class)
+                    .setParameter("team", teamB)
+                    .getSingleResult();
+
+            System.out.println("member = " + member);*/
+
+//            System.out.println("================================================================");
+
+            /**
+             * Named 쿼리 - 정적 쿼리 (미리 쿼리문을 정의해서 이름을 부여해두고 사용하는 JPQL)
+             * 정적 쿼리에서만 사용 가능.(쿼리 파라미터 넣고 하는 동적 쿼리)
+             * 어노테이션(엔티티), XML에 정의, 우선권 : xml
+             * 애플리케이션 로딩 시점에 초기화 후 재사용
+             * 애플리케이션 로딩 시점에 쿼리를 검증
+             * 쿼리문에 오류가 있으면 로딩 시점에 초기화 하는 특성 때문에 바로 런타임 에러가 뜸.
+             */
+          /*  List<JpqlMember> resultList1 = em.createNamedQuery("Member.findByUsername", JpqlMember.class)
+                    .setParameter("username", "회원1")
+                    .getResultList();
+
+            for (JpqlMember jpqlMain : resultList1) {
+                System.out.println("jpqlMain = " + jpqlMain);
+            }*/
+
+            /**
+             * 벌크 연산(update, delete)
+             * JPA 변경 감지 기능으로 실행하려면 너무 많은 SQL이 실행
+             * 쿼리 한 번으로 여러 테이블 로우 변경(엔티티)
+             * excuteUpdate()의 결과를 영향받은 엔티티 수 반환
+             * 주의점 : 영속성 컨텍스트를 무시하고 데이터베이스에 직접 쿼리(DB엔 update 쳤는데 entity에는 flush() 하기 전까지 변경 되기 전 값으로 되어 있는 현상 발생 -> DB에는 값이 변경 되었지만, 엔티티에는 변경 X)
+             * 해결 방법 : 1. 벌크 연산을 먼저 실행(영속성 컨텍스트에 아무 것도 작업 안하고), 2. 벌크 연산 수행 후 영속성 컨텍스트 초기화
+             */
+            // flush() 자동 호출 : commit, query가 나갈 때 자동으로 호출
+            int resultCount = em.createQuery("update JpqlMember m set m.age = 30")
+                    .executeUpdate();
+            em.clear();
+            System.out.println("resultCount = " + resultCount);
+
+
 
             tx.commit();
         } catch (Exception e) {
