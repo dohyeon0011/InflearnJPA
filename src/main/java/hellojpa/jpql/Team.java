@@ -1,6 +1,7 @@
 package hellojpa.jpql;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,8 @@ public class Team {
 
     private String name;
 
+    // select * from t from t 라 했을 때 이 쿼리 결과 값(team a 정보, team b 정보)을 내부에 결과 100개를 미리 깔아둠(N+1문제 잡힘)
+//    @BatchSize(size = 100) // persistence.xml에서 글로벌 설정 가능
     @OneToMany(mappedBy = "team")
     private List<JpqlMember> members = new ArrayList<>();
 
