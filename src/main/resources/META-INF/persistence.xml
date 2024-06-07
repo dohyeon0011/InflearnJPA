@@ -26,6 +26,7 @@
                     *테스트 서버는 update or validate -> 근데 가급적이면 사용 ㄴ(alter가 여러 개 나가면 잠시 서버가 중단되니)
                     *스테이징과 운영 서버는 validate or none -->
             <property name="hibernate.hbm2ddl.auto" value="create" />
+<!--            <property name="hibernate.default_batch_fetch_size" value="100"/>  &lt;!&ndash; /* batchsize 글로벌 설정 */ &ndash;&gt;-->
         </properties>
     </persistence-unit>
 
